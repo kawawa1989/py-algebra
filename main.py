@@ -43,23 +43,3 @@ for index, group in enumerate(SA_q):
     for e in group.elements.values():
         g = PermutationGroup.create_group(group, [e])
         print(KleinsGroup.mul(g))
-
-
-"""
-print(klein2)
-
-print(g)
-sub = g.get_subset([[(3, 4)]])
-print(sub)
-print(sub.mul(klein))
-
-sub = g.get_subset([[(1, 2)]])
-print(sub)
-print(sub.mul(klein))
-
-sub = g.get_subset([[(1, 3, 2, 4)]])
-print(sub)
-print(sub.mul(klein))
-
-PermutationGroup.symmetric_group(4)
-"""

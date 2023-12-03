@@ -2,19 +2,35 @@ from __future__ import annotations
 from functools import singledispatch
 
 
+def parse_transpositions(sequence: tuple, identity: list[int]):
+    transpositions = []
+    origin = 0
+    n_seq = list(sequence)
+    for value in identity:
+        i = n_seq.index(value)
+        # インデックスが一致しないのであれば origin にある要素と入れ替えを行う
+        if i != origin:
+            transpositions.append([n_seq[i], n_seq[origin]])
+            n_seq[i], n_seq[origin] = n_seq[origin], n_seq[i]
+
+        origin += 1
+    return transpositions
+
+
 class PermutationGroupElement:
-    def __init__(self, original_sequence: tuple, own_sequence: tuple,  swap_seqs: list[list[int]]) -> None:
-        self.original_sequence = original_sequence
-        self.own_sequence = own_sequence
-        self.swap_seqs = swap_seqs
+    def __init__(self, identity: tuple, sequence: tuple) -> None:
+        self.identity = identity
+        self.sequence = sequence
+        self.transpositions = parse_transpositions(
+            self.sequence, identity)
 
     @property
     def sequence_key(self):
-        return str(self.own_sequence)
+        return str(self.sequence)
 
     @property
     def swap_count(self):
-        return len(self.swap_seqs)
+        return len(self.transpositions)
 
     @property
     def is_even(self):
@@ -22,13 +38,13 @@ class PermutationGroupElement:
 
     @property
     def print_swap_flow(self):
-        sequence = list(self.original_sequence)
+        sequence = list(self.identity)
         s = "------------------------------------\n"
         s += f"{self.cycle_values}\n"
         s += "------------------------------------\n"
-        s += f"{self.original_sequence}\n"
-        s += f"{self.own_sequence}\n"
-        for swap in reversed(self.swap_seqs):
+        s += f"{self.identity}\n"
+        s += f"{self.sequence}\n"
+        for swap in reversed(self.transpositions):
             i = sequence.index(swap[0])
             j = sequence.index(swap[1])
             sequence[i], sequence[j] = sequence[j], sequence[i]
@@ -46,20 +62,20 @@ class PermutationGroupElement:
             return False
 
         def find_cyclic(value, group: list[int]):
-            i = self.original_sequence.index(value)
-            a = self.original_sequence[i]
-            b = self.own_sequence[i]
+            i = self.identity.index(value)
+            a = self.identity[i]
+            b = self.sequence[i]
             if b in group or has_been_marked(b):
                 return
 
             group.append(b)
             find_cyclic(b, group)
 
-        for i in range(len(self.original_sequence)):
-            a = self.original_sequence[i]
+        for i in range(len(self.identity)):
+            a = self.identity[i]
             if has_been_marked(a):
                 continue
-            b = self.own_sequence[i]
+            b = self.sequence[i]
             if a != b:
                 group = [a, b]
                 find_cyclic(b, group)
@@ -82,16 +98,16 @@ class PermutationGroupElement:
         if isinstance(value, tuple):
             sequence = list(value)
         else:
-            sequence = list(value.own_sequence)
+            sequence = list(value.sequence)
 
-        for swap in reversed(self.swap_seqs):
+        for swap in reversed(self.transpositions):
             i = sequence.index(swap[0])
             j = sequence.index(swap[1])
             sequence[i], sequence[j] = sequence[j], sequence[i]
         return tuple(sequence)
 
     def pow(self, p: int):
-        seq = self.original_sequence
+        seq = self.identity
         for i in range(p):
             seq = self.mul(seq)
         return seq
