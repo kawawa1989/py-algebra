@@ -25,11 +25,17 @@ SA_q = S4.quat(KleinsGroup)
 print("-------------------------------")
 print(f"S4/A4 (length={len(SA_q)}):")
 print("-------------------------------")
-for index, (key, value) in enumerate(SA_q.items()):
+for index, group in enumerate(SA_q):
+    if index == 0:
+        continue
     print("-------------------------------")
-    print(f"[{index}]: {key}")
+    print(f"[{index}]")
     print("-------------------------------")
-    print(value)
+    print(group)
+    for e in group.elements.values():
+        g = PermutationGroup.create_group(group, [e])
+        print(KleinsGroup.mul(g))
+
 
 # V0 = SA_q[(((),), ((1, 2), (3, 4)), ((1, 3), (2, 4)), ((1, 4), (2, 3)))]
 # V1 = SA_q[(((1, 2, 3, 4),), ((1, 3),), ((1, 4, 3, 2),), ((2, 4),))]

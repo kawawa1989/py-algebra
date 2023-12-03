@@ -69,7 +69,7 @@ class PermutationGroup:
         return PermutationGroup.create_child_group(self.root, elements=elements)
 
     # 引数は部分群 H とし、 gH の左剰余類を求める
-    def quat(self, H: PermutationGroup) -> dict[str, PermutationGroup]:
+    def quat(self, H: PermutationGroup) -> list[PermutationGroup]:
         G = self
         quatients: dict[str, dict[str, PermutationGroupElement]] = {}
         for g in G.elements.values():
@@ -79,20 +79,17 @@ class PermutationGroup:
                 elem = self.root.elements[generate_key(gh)]
                 coset.append(elem)
 
-            key = []
-            for e in coset:
-                key.append(e.cycle_values)
-            sorted_keys = tuple(sorted(key))
-
+            sorted_keys = tuple(sorted(e.cycle_values for e in coset))
             if not sorted_keys in quatients:
                 quatients[sorted_keys] = {}
             quatients[sorted_keys][g.sequence_key] = g
 
-        quatient_groups: dict[str, PermutationGroup] = {}
-        for key, value in quatients.items():
-            quatient_groups[key] = PermutationGroup.create_child_group(
-                self, value)
-        return quatient_groups
+        quatient_list: list[PermutationGroup] = []
+        for elements in quatients.values():
+            group = PermutationGroup.create_child_group(self, elements)
+            quatient_list.append(group)
+
+        return quatient_list
 
     @property
     def alternating_group(self) -> PermutationGroup:
