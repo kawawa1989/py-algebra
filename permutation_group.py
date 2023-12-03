@@ -50,6 +50,8 @@ class PermutationGroup:
         self.root: PermutationGroup = None
         self.identity: tuple[int, ...] = ()
         self.elements: dict[tuple, PermutationGroupElement] = {}
+        self.inverse_map: dict[tuple, PermutationGroupElement] = None
+        self.cyclic_group_map: dict[tuple, PermutationGroupElement] = None
 
     @property
     def order(self) -> int:
