@@ -31,6 +31,6 @@ class SymmetricGroup(PermutationGroup):
         for e in self:
             if e.is_even:
                 elements[e.sequence] = e
-        self.__alternating_group = PermutationGroup.create_child_group(
+        self.__alternating_group = PermutationGroup.create_group_by_dict(
             self, elements)
         return self.__alternating_group

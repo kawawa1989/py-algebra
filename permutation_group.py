@@ -15,7 +15,7 @@ class PermutationGroup:
         return inst
 
     @classmethod
-    def create_child_group(cls, parent: PermutationGroup, elements: dict[str, PermutationGroupElement]):
+    def create_group_by_dict(cls, parent: PermutationGroup, elements: dict[tuple, PermutationGroupElement]):
         inst: PermutationGroup = cls()
         inst.root = parent
         inst.identity = parent.identity
@@ -64,7 +64,7 @@ class PermutationGroup:
             for h in H:
                 gh = g.mul(h.mul(self.identity))
                 elements[gh] = self.root.elements[gh]
-        return PermutationGroup.create_child_group(self.root, elements=elements)
+        return PermutationGroup.create_group_by_dict(self.root, elements=elements)
 
     # 引数は部分群 H とし、 gH の左剰余類を求める
     def quat(self, H: PermutationGroup) -> list[PermutationGroup]:
@@ -84,7 +84,7 @@ class PermutationGroup:
 
         quatient_list: list[PermutationGroup] = []
         for elements in quatients.values():
-            group = PermutationGroup.create_child_group(self, elements)
+            group = PermutationGroup.create_group_by_dict(self, elements)
             quatient_list.append(group)
 
         return quatient_list
