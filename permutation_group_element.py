@@ -1,5 +1,4 @@
 from __future__ import annotations
-from functools import singledispatch
 
 
 def parse_transpositions(sequence: tuple, identity: list[int]):
@@ -17,27 +16,30 @@ def parse_transpositions(sequence: tuple, identity: list[int]):
     return transpositions
 
 
+# 対称群の元を定義する
 class PermutationGroupElement:
+    # identity ... 恒等元の役割を持つ、 (1,2,3,...n) の数列
+    #              この値をもとに置換操作を行う
+    # sequence ... identity を置換した後の数列
     def __init__(self, identity: tuple, sequence: tuple) -> None:
         self.identity = identity
         self.sequence = sequence
         self.transpositions = parse_transpositions(
             self.sequence, identity)
 
+    # 置換回数
     @property
-    def sequence_key(self):
-        return str(self.sequence)
-
-    @property
-    def swap_count(self):
+    def transposition_count(self):
         return len(self.transpositions)
 
+    # 偶置換であるか
     @property
     def is_even(self):
-        return self.swap_count % 2 == 0
+        return self.transposition_count % 2 == 0
 
+    # 置換操作のログを出力する
     @property
-    def print_swap_flow(self):
+    def print_permutation_flow(self):
         sequence = list(self.identity)
         s = "------------------------------------\n"
         s += f"{self.cycle_values}\n"
@@ -52,8 +54,8 @@ class PermutationGroupElement:
         return s
 
     @property
-    def cycle_values(self) -> tuple[tuple[int, ...], ...]:
-        values: list[tuple[int, ...]] = []
+    def cycle_values(self) -> tuple[tuple]:
+        values: list[tuple] = []
 
         def has_been_marked(item):
             for mark_as_used_item in values:
