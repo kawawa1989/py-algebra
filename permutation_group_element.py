@@ -16,6 +16,46 @@ def parse_transpositions(sequence: tuple, identity: list[int]):
     return transpositions
 
 
+# 置換前 → 置換後のサイクルを求める。
+# 例えば identity が (1 2 3) で sequence が (2 3 1) である場合、
+# 1 → 2 → 3 → 1 という置換になるので計算結果は (1 2 3) になる。
+# identity が (1 2 3 4) で sequence が (2 1 4 3) の場合、
+# 「1 と 2 の交換」と 「3 と 4 の交換」という操作になる(循環しないので別々の操作と扱う) ので
+# (1 2)(3 4) となる
+def parse_cycle_values(identity: tuple, sequence: tuple) -> tuple[tuple]:
+    values: list[tuple] = []
+
+    def has_been_marked(item):
+        for mark_as_used_item in values:
+            if item in mark_as_used_item:
+                return True
+        return False
+
+    def find_cyclic(value, group: list[int]):
+        i = identity.index(value)
+        a = identity[i]
+        b = sequence[i]
+        if b in group or has_been_marked(b):
+            return
+
+        group.append(b)
+        find_cyclic(b, group)
+
+    for i in range(len(identity)):
+        a = identity[i]
+        if has_been_marked(a):
+            continue
+        b = sequence[i]
+        if a != b:
+            group = [a, b]
+            find_cyclic(b, group)
+            values.append(tuple(group))
+
+    if len(values) == 0:
+        values.append(tuple([]))
+    return tuple(values)
+
+
 # 対称群の元を定義する
 class PermutationGroupElement:
     # identity ... 恒等元の役割を持つ、 (1,2,3,...n) の数列
@@ -24,8 +64,8 @@ class PermutationGroupElement:
     def __init__(self, identity: tuple, sequence: tuple) -> None:
         self.identity = identity
         self.sequence = sequence
-        self.transpositions = parse_transpositions(
-            self.sequence, identity)
+        self.transpositions = parse_transpositions(self.sequence, identity)
+        self.cycle_values = parse_cycle_values(self.identity, self.sequence)
 
     # 置換回数
     @property
@@ -52,40 +92,6 @@ class PermutationGroupElement:
             sequence[i], sequence[j] = sequence[j], sequence[i]
             s += f"swap ({swap[0]}, {swap[1]}) -> {sequence}\n"
         return s
-
-    @property
-    def cycle_values(self) -> tuple[tuple]:
-        values: list[tuple] = []
-
-        def has_been_marked(item):
-            for mark_as_used_item in values:
-                if item in mark_as_used_item:
-                    return True
-            return False
-
-        def find_cyclic(value, group: list[int]):
-            i = self.identity.index(value)
-            a = self.identity[i]
-            b = self.sequence[i]
-            if b in group or has_been_marked(b):
-                return
-
-            group.append(b)
-            find_cyclic(b, group)
-
-        for i in range(len(self.identity)):
-            a = self.identity[i]
-            if has_been_marked(a):
-                continue
-            b = self.sequence[i]
-            if a != b:
-                group = [a, b]
-                find_cyclic(b, group)
-                values.append(tuple(group))
-
-        if len(values) == 0:
-            values.append(tuple([]))
-        return tuple(values)
 
     def __str__(self):
         s = ""

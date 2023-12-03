@@ -51,11 +51,23 @@ class PermutationGroup:
         self.identity: tuple[int, ...] = ()
         self.elements: dict[tuple, PermutationGroupElement] = {}
 
+    @property
+    def order(self) -> int:
+        return len(self.elements)
+
+    @property
+    def alternating_group(self) -> PermutationGroup:
+        elements: dict[str, PermutationGroupElement] = {}
+        for e in self:
+            if e.is_even:
+                elements[e.sequence] = e
+        return PermutationGroup.create_child_group(self, elements)
+
     def get_element_by_sequence(self, sequence: tuple):
         return self.elements[sequence]
 
     def get_element_by_cycle(self, cycle_values: tuple):
-        for e in self.elements.values():
+        for e in self:
             if e.cycle_values == cycle_values:
                 return e
         return None
@@ -75,12 +87,11 @@ class PermutationGroup:
         return PermutationGroup.create_group(self, cyclic_group_elements)
 
     # 群同士の積を求めて新しい群を作成する
-
     def mul(self, H: PermutationGroup) -> PermutationGroup:
         G = self
         elements: dict[str, PermutationGroupElement] = {}
-        for g in G.elements.values():
-            for h in H.elements.values():
+        for g in G:
+            for h in H:
                 gh = g.mul(h.mul(self.identity))
                 elements[gh] = self.root.elements[gh]
         return PermutationGroup.create_child_group(self.root, elements=elements)
@@ -89,9 +100,9 @@ class PermutationGroup:
     def quat(self, H: PermutationGroup) -> list[PermutationGroup]:
         G = self
         quatients: dict[str, dict[str, PermutationGroupElement]] = {}
-        for g in G.elements.values():
+        for g in G:
             coset: list[PermutationGroupElement] = []
-            for h in H.elements.values():
+            for h in H:
                 gh = g.mul(h.mul(self.identity))
                 elem = self.get_element_by_sequence(gh)
                 coset.append(elem)
@@ -99,7 +110,7 @@ class PermutationGroup:
             sorted_keys = tuple(sorted(e.cycle_values for e in coset))
             if not sorted_keys in quatients:
                 quatients[sorted_keys] = {}
-            quatients[sorted_keys][g.sequence_key] = g
+            quatients[sorted_keys][g.sequence] = g
 
         quatient_list: list[PermutationGroup] = []
         for elements in quatients.values():
@@ -108,23 +119,13 @@ class PermutationGroup:
 
         return quatient_list
 
-    @property
-    def alternating_group(self) -> PermutationGroup:
-        elements: dict[str, PermutationGroupElement] = {}
+    def __iter__(self):
         for e in self.elements.values():
-            if e.is_even:
-                elements[e.sequence] = e
-        return PermutationGroup.create_child_group(self, elements)
-
-    def to_sorted_string(self):
-        s = ""
-        for k, e in sorted(self.elements.items()):
-            s += f"{e}\n"
-        return s
+            yield e
 
     def __str__(self):
         s = ""
-        for k, e in self.elements.items():
+        for e in self:
             s += f"{e}\n"
         return s
 
@@ -139,7 +140,7 @@ class PermutationGroup:
 
         elements: list[PermutationGroupElement] = []
         for key in sequence_query:
-            for e in self.elements.values():
+            for e in self:
                 if equals(e.cycle_values, key):
                     elements.append(
                         self.get_element_by_sequence(e.sequence))
