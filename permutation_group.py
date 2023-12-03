@@ -129,6 +129,15 @@ class PermutationGroup:
             s += f"{e}\n"
         return s
 
+    def to_string(self, sort_elements=True):
+        elements = list(self.elements.values())
+        if sort_elements:
+            elements = sorted(elements, key=lambda x: x.cycle_values)
+        s = ""
+        for e in elements:
+            s += f"{e}\n"
+        return s
+
     def __getitem__(self, sequence_query):
         def equals(cycle_values, key):
             if len(cycle_values) != len(key):

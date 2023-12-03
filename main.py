@@ -40,6 +40,7 @@ for index, group in enumerate(SA_q):
     print(f"[{index}]")
     print("-------------------------------")
     print(group)
+    print("-------------------------------")
     for e in group:
         g = PermutationGroup.create_group(group, [e])
-        print(KleinsGroup.mul(g))
+        print(KleinsGroup.mul(g).to_string())
