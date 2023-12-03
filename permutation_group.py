@@ -16,7 +16,7 @@ class PermutationGroup:
 
         inst: PermutationGroup = cls()
         inst.root = inst
-        inst.original_sequence = sequence
+        inst.original_sequence = tuple(sequence)
 
         # 全ての組み合わせパターンを生成
         swapped_sequences = list(permutations(inst.original_sequence))
@@ -36,8 +36,8 @@ class PermutationGroup:
     @classmethod
     def create_group(cls, parent: PermutationGroup, elements: list[PermutationGroupElement]):
         dic = {}
-        for item in elements:
-            dic[generate_key(item.own_sequence)] = item
+        for e in elements:
+            dic[generate_key(e.own_sequence)] = e
         inst: PermutationGroup = cls()
         inst.root = parent
         inst.original_sequence = parent.original_sequence
@@ -57,7 +57,31 @@ class PermutationGroup:
         self.original_sequence: tuple[int, ...] = ()
         self.elements: dict[str, PermutationGroupElement] = {}
 
+    def get_element_by_sequence(self, sequence: tuple):
+        return self.elements[generate_key(sequence)]
+
+    def get_element_by_cycle(self, cycle_values: tuple):
+        for e in self.elements.values():
+            if e.cycle_values == cycle_values:
+                return e
+        return None
+
+    def element_op_pow(self, element: PermutationGroupElement, p: int):
+        return self.get_element_by_sequence(element.pow(p))
+
+    def create_cyclic_group(self, element: PermutationGroupElement):
+        current_seq = element.own_sequence
+        cyclic_group_elements = []
+        while current_seq != self.original_sequence:
+            elem = self.get_element_by_sequence(current_seq)
+            cyclic_group_elements.append(elem)
+            current_seq = element.mul(current_seq)
+        elem = self.get_element_by_sequence(current_seq)
+        cyclic_group_elements.append(elem)
+        return PermutationGroup.create_group(self, cyclic_group_elements)
+
     # 群同士の積を求めて新しい群を作成する
+
     def mul(self, H: PermutationGroup) -> PermutationGroup:
         G = self
         elements: dict[str, PermutationGroupElement] = {}
@@ -76,7 +100,7 @@ class PermutationGroup:
             coset: list[PermutationGroupElement] = []
             for h in H.elements.values():
                 gh = g.mul(h.mul(self.original_sequence))
-                elem = self.root.elements[generate_key(gh)]
+                elem = self.get_element_by_sequence(gh)
                 coset.append(elem)
 
             sorted_keys = tuple(sorted(e.cycle_values for e in coset))
@@ -115,7 +139,13 @@ class PermutationGroup:
 
     def __str__(self):
         s = ""
-        for k, e in sorted(self.elements.items(), key=lambda x: x[1].cycle_values):
+        for k, e in self.elements.items():
+            s += f"{e}\n"
+        return s
+
+    def to_sorted_string(self):
+        s = ""
+        for k, e in sorted(self.elements.items()):
             s += f"{e}\n"
         return s
 
@@ -133,6 +163,6 @@ class PermutationGroup:
             for e in self.elements.values():
                 if equals(e.cycle_values, key):
                     elements.append(
-                        self.elements[generate_key(e.own_sequence)])
+                        self.get_element_by_sequence(e.own_sequence))
 
         return PermutationGroup.create_group(self, elements)

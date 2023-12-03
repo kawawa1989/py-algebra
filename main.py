@@ -1,11 +1,19 @@
 from permutation_group import PermutationGroup
-
-
 S4 = PermutationGroup.create_symmetric_group(4)
+
+
 print("-------------------------------")
 print(f"S4 (length={len(S4.elements)}):")
 print("-------------------------------")
 print(S4)
+print("Cyclic Group:")
+for e in S4.elements.values():
+    cyclic_group = S4.create_cyclic_group(e)
+    print("-------------------------------")
+    print(f"{e} len: {len(cyclic_group.elements)}")
+    print("-------------------------------")
+    print(cyclic_group)
+
 
 A4 = S4.alternating_group
 print("-------------------------------")
@@ -35,15 +43,6 @@ for index, group in enumerate(SA_q):
     for e in group.elements.values():
         g = PermutationGroup.create_group(group, [e])
         print(KleinsGroup.mul(g))
-
-
-# V0 = SA_q[(((),), ((1, 2), (3, 4)), ((1, 3), (2, 4)), ((1, 4), (2, 3)))]
-# V1 = SA_q[(((1, 2, 3, 4),), ((1, 3),), ((1, 4, 3, 2),), ((2, 4),))]
-# a0_V1 = V1[((1, 3),)]
-
-
-# klein2 = list(SA_q.values())
-# g = list(SA_q.values())[1]
 
 
 """

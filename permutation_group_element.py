@@ -1,5 +1,9 @@
+from __future__ import annotations
+from functools import singledispatch
+
+
 class PermutationGroupElement:
-    def __init__(self, original_sequence: tuple[int, ...], own_sequence: tuple[int, ...],  swap_seqs: list[list[int]]) -> None:
+    def __init__(self, original_sequence: tuple, own_sequence: tuple,  swap_seqs: list[list[int]]) -> None:
         self.original_sequence = original_sequence
         self.own_sequence = own_sequence
         self.swap_seqs = swap_seqs
@@ -73,10 +77,21 @@ class PermutationGroupElement:
             s = "()"
         return s
 
-    def mul(self, value: tuple[int, ...]) -> tuple[int, ...]:
-        sequence = list(value)
+    def mul(self, value: any) -> tuple:
+        sequence = None
+        if isinstance(value, tuple):
+            sequence = list(value)
+        else:
+            sequence = list(value.own_sequence)
+
         for swap in reversed(self.swap_seqs):
             i = sequence.index(swap[0])
             j = sequence.index(swap[1])
             sequence[i], sequence[j] = sequence[j], sequence[i]
         return tuple(sequence)
+
+    def pow(self, p: int):
+        seq = self.original_sequence
+        for i in range(p):
+            seq = self.mul(seq)
+        return seq
