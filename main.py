@@ -1,6 +1,7 @@
-from permutation_group import PermutationGroup
-S4 = PermutationGroup.create_symmetric_group(4)
+from symmetric_group import SymmetricGroup
 
+
+S4 = SymmetricGroup(4)
 
 print("-------------------------------")
 print(f"S4 (length={S4.order}):")
@@ -14,7 +15,7 @@ for e in S4:
     print("-------------------------------")
     print(cyclic_group)
 
-
+"""
 A4 = S4.alternating_group
 print("-------------------------------")
 print(f"A4 (length={A4.order}):")
@@ -44,3 +45,4 @@ for index, group in enumerate(SA_q):
     for e in group:
         g = PermutationGroup.create_group(group, [e])
         print(KleinsGroup.mul(g).to_string())
+"""

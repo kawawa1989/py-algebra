@@ -1,32 +1,8 @@
 from __future__ import annotations
-from itertools import permutations
 from permutation_group_element import PermutationGroupElement
 
 
 class PermutationGroup:
-    @classmethod
-    def create_symmetric_group(cls, n):
-        sequence = []
-        for i in range(n):
-            sequence.append(i + 1)
-
-        inst: PermutationGroup = cls()
-        inst.root = inst
-        inst.identity = tuple(sequence)
-
-        # 全ての組み合わせパターンを生成
-        swapped_sequences = list(permutations(inst.identity))
-        i = 0
-        for c in swapped_sequences:
-            element = PermutationGroupElement(
-                inst.identity,
-                c)
-
-            key = element.sequence
-            inst.elements[key] = element
-            i += 1
-        return inst
-
     @classmethod
     def create_group(cls, parent: PermutationGroup, elements: list[PermutationGroupElement]):
         dic = {}
@@ -56,14 +32,6 @@ class PermutationGroup:
     @property
     def order(self) -> int:
         return len(self.elements)
-
-    @property
-    def alternating_group(self) -> PermutationGroup:
-        elements: dict[str, PermutationGroupElement] = {}
-        for e in self:
-            if e.is_even:
-                elements[e.sequence] = e
-        return PermutationGroup.create_child_group(self, elements)
 
     def get_element_by_sequence(self, sequence: tuple):
         return self.elements[sequence]
