@@ -102,7 +102,13 @@ class PermutationGroupElement(Element):
             s = "()"
         return s
 
-    def __mul__(self, value: any) -> Element:
+    def pow(self, p: int) -> PermutationGroupElement:
+        seq = self.identity
+        for i in range(p):
+            seq = self.mul(seq)
+        return self.provider.provide(seq)
+
+    def __mul__(self, value: any) -> PermutationGroupElement:
         return self.provider.provide(self.mul(value))
 
     def mul(self, value: any) -> tuple:
@@ -117,9 +123,3 @@ class PermutationGroupElement(Element):
             j = sequence.index(swap[1])
             sequence[i], sequence[j] = sequence[j], sequence[i]
         return tuple(sequence)
-
-    def pow(self, p: int):
-        seq = self.identity
-        for i in range(p):
-            seq = self.mul(seq)
-        return seq

@@ -1,6 +1,7 @@
 from __future__ import annotations
+import re
 from algebra_structure.group.permutation_group_element import PermutationGroupElement
-from algebra_structure.operator.group import Element, Group, IElement, IElementProvider
+from algebra_structure.operator.group import Element, Group, IElementProvider
 
 class PermutationGroup(Group, IElementProvider):
     @classmethod
@@ -33,18 +34,20 @@ class PermutationGroup(Group, IElementProvider):
     def order(self) -> int:
         return len(self.elements)
 
-    def provide(self, id: any) -> IElement:
+    def provide(self, id: any) -> PermutationGroupElement:
         element = self.get_element_by_sequence(id)
         if element:
             return element
         return self.get_element_by_cycle(id)
 
-    def operator_mul_g_and_e(self, e: Element) -> Group:
-        pass
+    def operator_mul_g_and_e(self, e: Element):
+        return self.mul(PermutationGroup.create_group(self, [e]))
 
-    def operate_mul_g_and_h(self, h: Group) -> Group:
+    def operate_mul_g_and_h(self, h: Group):
         return self.mul(h)
-
+    
+    def operate_truediv_g_and_h(self, h: Group):
+        return self.quat(h)
 
     def get_element_by_sequence(self, sequence: tuple):
         if not sequence in self.elements:
@@ -57,18 +60,13 @@ class PermutationGroup(Group, IElementProvider):
                 return e
         return None
 
-    def element_op_pow(self, element: PermutationGroupElement, p: int):
-        return self.get_element_by_sequence(element.pow(p))
-
     def create_cyclic_group(self, element: PermutationGroupElement):
-        current_seq = element.sequence
         cyclic_group_elements = []
-        elem = self.get_element_by_sequence(current_seq)
-        while current_seq != self.identity:
+        elem = element
+        while elem.sequence != self.identity:
             cyclic_group_elements.append(elem)
-            elem = element * current_seq
-            current_seq = elem.sequence
-        elem = self.get_element_by_sequence(current_seq)
+            elem = element * elem
+
         cyclic_group_elements.append(elem)
         return PermutationGroup.create_group(self, cyclic_group_elements)
 
@@ -78,8 +76,8 @@ class PermutationGroup(Group, IElementProvider):
         elements: dict[str, PermutationGroupElement] = {}
         for g in G:
             for h in H:
-                gh = g.mul(h.mul(self.identity))
-                elements[gh] = self.root.elements[gh]
+                gh = g * h * self.identity
+                elements[gh.sequence] = gh
         return PermutationGroup.create_group_by_dict(self.root, elements=elements)
 
     # 引数は部分群 H とし、 gH の左剰余類を求める
@@ -89,9 +87,8 @@ class PermutationGroup(Group, IElementProvider):
         for g in G:
             coset: list[PermutationGroupElement] = []
             for h in H:
-                gh = g.mul(h.mul(self.identity))
-                elem = self.get_element_by_sequence(gh)
-                coset.append(elem)
+                gh = g * h * self.identity
+                coset.append(gh)
 
             sorted_keys = tuple(sorted(e.cycle_values for e in coset))
             if not sorted_keys in quatients:
@@ -124,20 +121,25 @@ class PermutationGroup(Group, IElementProvider):
             s += f"{e}\n"
         return s
 
-    def __getitem__(self, sequence_query):
-        def equals(cycle_values, key):
-            if len(cycle_values) != len(key):
-                return False
-            for cycle in cycle_values:
-                if not cycle in key:
-                    return False
-            return True
-
-        elements: list[PermutationGroupElement] = []
-        for key in sequence_query:
-            for e in self:
-                if equals(e.cycle_values, key):
-                    elements.append(
-                        self.get_element_by_sequence(e.sequence))
-
+    def __getitem__(self, query: str):
+        elements = []
+        splitted_query = query.split(",")
+        for q in splitted_query:
+            cycle_values = []
+            for match in re.findall(r"\(([\d\s]*)\)", q.strip()):
+                numbers_str = match.split(" ")
+                cycle = []
+                for num in numbers_str:
+                    if not num:
+                        continue
+                    cycle.append(int(num))
+                cycle_values.append(tuple(cycle))
+            
+            #if len(cycle_values) == 0:
+            #    cycle_values.append(tuple([]))
+            element = self.get_element_by_cycle(tuple(cycle_values))
+            elements.append(element)
+        if len(elements) == 1:
+            return elements[0]
         return PermutationGroup.create_group(self, elements)
+
