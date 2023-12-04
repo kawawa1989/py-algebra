@@ -1,8 +1,8 @@
 from __future__ import annotations
-from permutation_group_element import PermutationGroupElement
+from algebra_structure.group.permutation_group_element import PermutationGroupElement
+from algebra_structure.operator.group import Element, Group, IElement, IElementProvider
 
-
-class PermutationGroup:
+class PermutationGroup(Group, IElementProvider):
     @classmethod
     def create_group(cls, parent: PermutationGroup, elements: list[PermutationGroupElement]):
         dic = {}
@@ -33,7 +33,22 @@ class PermutationGroup:
     def order(self) -> int:
         return len(self.elements)
 
+    def provide(self, id: any) -> IElement:
+        element = self.get_element_by_sequence(id)
+        if element:
+            return element
+        return self.get_element_by_cycle(id)
+
+    def operator_mul_g_and_e(self, e: Element) -> Group:
+        pass
+
+    def operate_mul_g_and_h(self, h: Group) -> Group:
+        return self.mul(h)
+
+
     def get_element_by_sequence(self, sequence: tuple):
+        if not sequence in self.elements:
+            return None
         return self.elements[sequence]
 
     def get_element_by_cycle(self, cycle_values: tuple):
@@ -48,10 +63,11 @@ class PermutationGroup:
     def create_cyclic_group(self, element: PermutationGroupElement):
         current_seq = element.sequence
         cyclic_group_elements = []
+        elem = self.get_element_by_sequence(current_seq)
         while current_seq != self.identity:
-            elem = self.get_element_by_sequence(current_seq)
             cyclic_group_elements.append(elem)
-            current_seq = element.mul(current_seq)
+            elem = element * current_seq
+            current_seq = elem.sequence
         elem = self.get_element_by_sequence(current_seq)
         cyclic_group_elements.append(elem)
         return PermutationGroup.create_group(self, cyclic_group_elements)

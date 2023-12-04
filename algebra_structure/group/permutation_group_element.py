@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from algebra_structure.operator.group import Element, IElementProvider
 
 def parse_transpositions(sequence: tuple, identity: list[int]):
     transpositions = []
@@ -57,11 +57,12 @@ def parse_cycle_values(identity: tuple, sequence: tuple) -> tuple[tuple]:
 
 
 # 対称群の元を定義する
-class PermutationGroupElement:
+class PermutationGroupElement(Element):    
     # identity ... 恒等元の役割を持つ、 (1,2,3,...n) の数列
     #              この値をもとに置換操作を行う
     # sequence ... identity を置換した後の数列
-    def __init__(self, identity: tuple, sequence: tuple) -> None:
+    def __init__(self, provider: IElementProvider, identity: tuple, sequence: tuple) -> None:
+        super().__init__(provider)
         self.identity = identity
         self.sequence = sequence
         self.transpositions = parse_transpositions(self.sequence, identity)
@@ -100,6 +101,9 @@ class PermutationGroupElement:
         if not s:
             s = "()"
         return s
+
+    def __mul__(self, value: any) -> Element:
+        return self.provider.provide(self.mul(value))
 
     def mul(self, value: any) -> tuple:
         sequence = None

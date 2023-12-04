@@ -1,7 +1,6 @@
 from itertools import permutations
-from permutation_group import PermutationGroup
-from permutation_group_element import PermutationGroupElement
-
+from algebra_structure.group.permutation_group import PermutationGroup
+from algebra_structure.group.permutation_group_element import PermutationGroupElement
 
 class SymmetricGroup(PermutationGroup):
     def __init__(self, n: int) -> None:
@@ -17,7 +16,7 @@ class SymmetricGroup(PermutationGroup):
         swapped_sequences = list(permutations(self.identity))
         i = 0
         for c in swapped_sequences:
-            element = PermutationGroupElement(self.identity, c)
+            element = PermutationGroupElement(self, self.identity, c)
             key = element.sequence
             self.elements[key] = element
             i += 1
