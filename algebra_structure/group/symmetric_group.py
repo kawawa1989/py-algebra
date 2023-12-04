@@ -5,21 +5,18 @@ from algebra_structure.group.permutation_group_element import PermutationGroupEl
 class SymmetricGroup(PermutationGroup):
     def __init__(self, n: int) -> None:
         super().__init__()
-        sequence = []
+        identity_set = []
         for i in range(n):
-            sequence.append(i + 1)
+            identity_set.append(i + 1)
         self.root = self
-        self.identity = tuple(sequence)
+        self.identity_set = tuple(identity_set)
         self.__alternating_group: PermutationGroup = None
 
         # 全ての組み合わせパターンを生成
-        swapped_sequences = list(permutations(self.identity))
-        i = 0
-        for c in swapped_sequences:
-            element = PermutationGroupElement(self, self.identity, c)
-            key = element.sequence
-            self.elements[key] = element
-            i += 1
+        permuted_sets = list(permutations(self.identity_set))
+        for permuted_set in permuted_sets:
+            element = PermutationGroupElement(self, self.identity_set, permuted_set)
+            self.elements[element.id] = element
 
     @property
     def alternating_group(self) -> PermutationGroup:
@@ -29,7 +26,7 @@ class SymmetricGroup(PermutationGroup):
         elements: dict[str, PermutationGroupElement] = {}
         for e in self:
             if e.is_even:
-                elements[e.sequence] = e
+                elements[e.permuted_set] = e
         self.__alternating_group = PermutationGroup.create_group_by_dict(
             self, elements)
         return self.__alternating_group
