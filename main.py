@@ -1,8 +1,7 @@
-from symmetric_group import SymmetricGroup
+from algebra_structure.group.symmetric_group import SymmetricGroup
 
 
 S4 = SymmetricGroup(4)
-
 print("-------------------------------")
 print(f"S4 (length={S4.order}):")
 print("-------------------------------")
