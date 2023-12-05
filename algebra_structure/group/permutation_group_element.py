@@ -99,6 +99,20 @@ class PermutationGroupElement(Element):
             temp[i], temp[j] = temp[j], temp[i]
             s += f"permutation ({permutation[0]}, {permutation[1]}) -> {temp}\n"
         return s
+    
+    # 逆元を求める
+    def inverse(self):
+        # 置換回数が0回であれば単位元であり、単位元は自分自身が逆元であるので自身を返す。
+        # 置換回数が1回の場合も自分自身で演算すれば単位元となるので自身が逆元である。
+        if self.permutations_count < 2:
+            return self
+        temp_set = list(self.identity_set)
+        for perm in self.permutations:
+            i = temp_set.index(perm[0])
+            j = temp_set.index(perm[1])
+            temp_set[i], temp_set[j] = temp_set[j], temp_set[i]
+        return self.provider.provide(tuple(temp_set))
+
 
     def __str__(self):
         s = ""

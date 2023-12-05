@@ -87,7 +87,7 @@ class PermutationGroup(Group, IElementProvider):
         for g in G:
             coset: list[PermutationGroupElement] = []
             for h in H:
-                gh = g * h * self.identity_set
+                gh = g * h
                 coset.append(gh)
 
             sorted_keys = tuple(sorted(e.cycle_value for e in coset))
@@ -101,6 +101,17 @@ class PermutationGroup(Group, IElementProvider):
             quatient_list.append(group)
 
         return quatient_list
+    
+    # 共役類を探し、リスト形式に変換して返す
+    def get_conjugacy_classes(self):
+        G = self
+        N = self
+        conjugacy_classes: dict[tuple, list[PermutationGroupElement]] = {}
+        for n in N:
+            elements = [g * n * g.inverse() for g in G]
+            sorted_keys = tuple(sorted(e.cycle_value for e in elements))
+            conjugacy_classes.setdefault(sorted_keys, []).append(n)
+        return [PermutationGroup.create_group(self, values) for values in conjugacy_classes.values()]
 
     def __iter__(self):
         for e in self.elements.values():
